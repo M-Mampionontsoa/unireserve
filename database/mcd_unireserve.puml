@@ -1,0 +1,112 @@
+@startuml MCD_UniReserve
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+skinparam linetype ortho
+
+' =====================================================================
+' Corrections par rapport au MCD original (voir schema.sql pour le detail) :
+' - Utilisateurs : ajout mot_de_passe, oauth_provider, oauth_id
+' - Reservation : ajout statut, motif_refus, type_reservation, id_salle, id_admin_validateur
+' - Materiel : suppression du doublon "Quantite" (String + int -> un seul int)
+' - Ajout de la classe association Salle_Materiel (relation many-to-many "avoir")
+' =====================================================================
+
+abstract class Utilisateurs {
+  +id : int
+  +nom : String
+  +prenom : String
+  +nom_utilisateur : String
+  +adresse_email : String
+  +mot_de_passe : String
+  +oauth_provider : String
+  +oauth_id : String
+  +role : String
+}
+
+class Etudiant {
+  +faculte : String
+  +mention : String
+  +parcours : String
+  +niveau : ENUM(L1,L2,L3,M1,M2)
+  +numero_inscription : String
+}
+
+class Enseignant {
+  +faculte : String
+  +mention : String
+  +parcours : String
+  +matiereEnseignee : String
+  +numeroMatricule : String
+}
+
+class Association {
+  +typeActivite : String
+  +soumettreDemandeSalle()
+  +consulterDisponibiliteSalle()
+  +verifierStatutDemande()
+}
+
+class Admin {
+  +status : String
+  +voirDemande()
+  +validerReservation()
+  +genererTableauDeBord()
+}
+
+class Salle {
+  +id : int
+  +nom : String
+  +type : String
+  +capacite : int
+  +quantite : int
+  +etat : String
+  +dateAcquisition : Date
+}
+note right of Salle::quantite
+  Present dans le MCD original,
+  sens metier a clarifier
+  (cf. schema.sql)
+end note
+
+class Materiel {
+  +id : int
+  +nom : String
+  +type : String
+  +quantite : int
+  +etat : String
+  +dateAcquisition : Date
+}
+
+class Salle_Materiel {
+  +quantite : int
+}
+
+class Reservation {
+  +id : int
+  +debut : DateTime
+  +fin : DateTime
+  +statut : ENUM(EN_ATTENTE,CONFIRMEE,REFUSEE,ANNULEE)
+  +typeReservation : ENUM(RESERVATION,BLOCAGE)
+  +motifRefus : String
+  +valideLe : DateTime
+}
+
+' --- Heritage (specialisation Utilisateurs) ---
+Utilisateurs <|-- Etudiant
+Utilisateurs <|-- Enseignant
+Utilisateurs <|-- Association
+Utilisateurs <|-- Admin
+
+' --- Associations ---
+Admin "1" -- "0..*" Salle : gere >
+Salle "1" -- "0..*" Salle_Materiel
+Materiel "1" -- "0..*" Salle_Materiel
+Utilisateurs "1" -- "0..*" Reservation : soumet >
+Salle "1" -- "0..*" Reservation : concerne >
+Admin "0..1" -- "0..*" Reservation : valide >
+
+@enduml

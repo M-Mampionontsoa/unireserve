@@ -1,11 +1,11 @@
 package com.unireserve.dto;
 
-import org.springframework.stereotype.Component;
+
 
 import lombok.Data;
 
 @Data
-@Component
+
 public class LoginResponseDTO {
     private String accessToken;      // Token JWT pour l'authentification
     private String refreshToken;     // Token pour rafraîchir l'accessToken

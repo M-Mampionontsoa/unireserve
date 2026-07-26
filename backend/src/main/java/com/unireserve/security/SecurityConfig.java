@@ -12,16 +12,22 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.Customizer;
 import com.unireserve.service.Authentification.JwtAuthenticationFilter;
+import com.unireserve.service.Authentification.CustomUserInfoService;
+import com.unireserve.service.Authentification.GoogleJwtSuccessHandler;
 
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private CustomUserInfoService customUserInfoService;
+    private GoogleJwtSuccessHandler googleJwtSuccessHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter)
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,CustomUserInfoService customUserInfoService,GoogleJwtSuccessHandler googleJwtSuccessHandler)
     {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customUserInfoService = customUserInfoService;
+        this.googleJwtSuccessHandler =googleJwtSuccessHandler;
     }
 
 
@@ -35,8 +41,11 @@ public class SecurityConfig {
         )
         .csrf(csrf -> csrf.disable())
         .cors(Customizer.withDefaults())
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo ->userInfo.oidcUserService(this.customUserInfoService) )
+            .successHandler(googleJwtSuccessHandler)
+        );
 
         return http.build();
     }

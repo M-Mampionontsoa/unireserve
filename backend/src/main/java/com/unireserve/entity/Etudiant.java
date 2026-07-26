@@ -10,7 +10,7 @@ import jakarta.persistence.EnumType;
 
 @Entity
 @Table(name = "etudiant")
-@PrimaryKeyJoinColumn(name = "id_utilisateur") 
+@PrimaryKeyJoinColumn(name = "id_utilisateur")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Etudiant extends Utilisateur {

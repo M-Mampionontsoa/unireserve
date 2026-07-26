@@ -8,6 +8,10 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.unireserve.dto.SigninDTO;
+import com.unireserve.entity.Admin;
+import com.unireserve.entity.Enseignant;
+import com.unireserve.entity.Etudiant;
+import com.unireserve.entity.Association;
 import com.unireserve.entity.Role;
 import com.unireserve.entity.Utilisateur;
 import com.unireserve.entity.Exception.UserAlreadyExistExpetion;
@@ -32,20 +36,40 @@ public class UserService {
         {
              throw new UserAlreadyExistExpetion("Un utilisateur avec l'email " + utilisateur.getEmail() + " existe déjà");
         }
-        Utilisateur newUtilisateur = new Utilisateur();
-        String encodedPassword = passwordEncoder.encode(utilisateur.getPassword());
-        newUtilisateur.setPassword(encodedPassword);
+        Role selectedRole = Role.valueOf(utilisateur.getRole().toUpperCase());
+
+Utilisateur newUtilisateur;
+
+        switch (selectedRole) {
+        
+            case ETUDIANT:
+                newUtilisateur = new Etudiant();
+                break;
+        
+            case ENSEIGNANT:
+                newUtilisateur = new Enseignant();
+                break;
+        
+            case ASSOCIATION:
+                newUtilisateur = new Association();
+                break;
+        
+            case ADMIN:
+                newUtilisateur = new Admin();
+                break;
+        
+            default:
+                throw new IllegalArgumentException("Rôle inconnu");
+        }
         newUtilisateur.setNom(utilisateur.getName());
         newUtilisateur.setPrenom(utilisateur.getFirstName());
-        newUtilisateur.setMail(utilisateur.getEmail());
         newUtilisateur.setUsername(utilisateur.getUsername());
+        newUtilisateur.setMail(utilisateur.getEmail());
+        newUtilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
+        newUtilisateur.setRole(selectedRole);
         newUtilisateur.setCreatedAt(LocalDateTime.now());
         newUtilisateur.setUpdatedAt(LocalDateTime.now());
-        Role selectedRole = Role.valueOf(utilisateur.getRole().toUpperCase());
-        newUtilisateur.setRole(selectedRole);
-
-
-
+            
         return userRepository.save(newUtilisateur);
     }
 }   

@@ -16,15 +16,18 @@ export default function Login() {
       await loginUser(formData);
       navigate("/salles"); // adapte vers ta route "Liste des salles"
     } catch (err) {
-      const message = isAxiosError(err) && err.response?.status === 401
-        ? "Email ou mot de passe incorrect."
-        : "Une erreur est survenue, réessaie.";
+      const message =
+        isAxiosError(err) && err.response?.status === 401
+          ? "Email ou mot de passe incorrect."
+          : "Une erreur est survenue, réessaie.";
       setApiError(message);
     }
   };
 
   const handleGoogleLogin = () => {
-    const base = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") || "http://localhost:8080";
+    const base =
+      import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
+      "http://localhost:8081";
     window.location.href = `${base}/oauth2/authorization/google`;
   };
 

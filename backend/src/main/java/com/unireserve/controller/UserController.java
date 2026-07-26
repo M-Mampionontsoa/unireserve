@@ -21,6 +21,7 @@ import com.unireserve.dto.UserInfoDTO;
 import com.unireserve.entity.Utilisateur;
 import com.unireserve.entity.Exception.UserAlreadyExistExpetion;
 import com.unireserve.repository.UserRepository;
+import com.unireserve.service.Authentification.AuthTokenService;
 import com.unireserve.service.Authentification.CustumUserDetails;
 import com.unireserve.service.Authentification.JwtService;
 import com.unireserve.service.Authentification.RefreshTokenService;
@@ -35,18 +36,20 @@ import com.unireserve.service.UserService;
 public class UserController {
     private UserService userService;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;  // ← AJOUTEZ CETTE LIGNE
+    private final JwtService jwtService;  
+    private final AuthTokenService authTokenService;
     private final RefreshTokenService refreshTokenService; 
 
     public UserController(
             UserService userService,
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-            RefreshTokenService refreshTokenService) {
+            RefreshTokenService refreshTokenService,AuthTokenService authTokenService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.authTokenService=authTokenService;
     }
 
     @PostMapping("/signin")

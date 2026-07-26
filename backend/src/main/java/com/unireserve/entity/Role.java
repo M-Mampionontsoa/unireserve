@@ -4,6 +4,7 @@ public enum Role {
     ETUDIANT,
     ENSEIGNANT,
     ASSOCIATION,
-    ADMIN
+    ADMIN,
+    PENDING
 }
 

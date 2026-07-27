@@ -44,7 +44,7 @@ public class CustomUserInfoService extends OidcUserService{
        if(prenom == null)
             prenom = "nan";
        Optional<Utilisateur> user = userRepository.findByMail(oidcUser.getEmail());
-       List<GrantedAuthority> finalAuthorities = new ArrayList<>();
+       Utilisateur userFinal = null;
 
        if(!user.isPresent())
        {
@@ -60,21 +60,23 @@ public class CustomUserInfoService extends OidcUserService{
             newUser.setUpdatedAt(LocalDateTime.now());
             newUser.setRole(com.unireserve.entity.Role.PENDING);
 
-            userRepository.save(newUser);
-            finalAuthorities.add(new SimpleGrantedAuthority("ROLE_" + newUser.getRole()));
+            userFinal=userRepository.save(newUser);
+            
             
 
        }
        else
        {
-            Utilisateur userReel = user.get();
-            finalAuthorities.add(new SimpleGrantedAuthority("ROLE_" + userReel.getRole()));
-            
-
+          Utilisateur userReel = user.get();
+          userFinal=userReel;
        }
        
 
-       return new DefaultOidcUser(finalAuthorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), "email");
+      return new CustumPrincipal(
+        userFinal,
+        oidcUser.getIdToken(),
+        oidcUser.getUserInfo()
+          );
     }
 
 

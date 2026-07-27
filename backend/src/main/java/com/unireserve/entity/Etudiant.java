@@ -21,6 +21,8 @@ public class Etudiant extends Utilisateur {
 
     private String parcours;
 
+    
+
     private String numeroInscription;
 
     @Enumerated(EnumType.STRING)

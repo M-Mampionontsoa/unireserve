@@ -10,27 +10,32 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.unireserve.dto.AuthDTO;
 import com.unireserve.dto.LoginResponseDTO;
+import com.unireserve.dto.ProfileDto;
 import com.unireserve.dto.SigninDTO;
+import com.unireserve.dto.UpdateProfileDto;
 import com.unireserve.dto.UserInfoDTO;
 import com.unireserve.entity.Utilisateur;
 import com.unireserve.entity.Exception.UserAlreadyExistExpetion;
 import com.unireserve.repository.UserRepository;
 import com.unireserve.service.Authentification.AuthTokenService;
+import com.unireserve.service.Authentification.CustumPrincipal;
 import com.unireserve.service.Authentification.CustumUserDetails;
 import com.unireserve.service.Authentification.JwtService;
 import com.unireserve.service.Authentification.RefreshTokenService;
 import java.time.Duration;
 import java.net.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletResponse;
-
+import org.springframework.web.bind.annotation.PutMapping;
 import com.unireserve.entity.RefreshToken;
 import com.unireserve.service.UserService;
+
 
 @RestController
 public class UserController {
@@ -39,6 +44,7 @@ public class UserController {
     private final JwtService jwtService;  
     private final AuthTokenService authTokenService;
     private final RefreshTokenService refreshTokenService; 
+    //private final Authentication authentication;
 
     public UserController(
             UserService userService,
@@ -135,6 +141,37 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", e.getMessage()));
-}
+        }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Authentication authentication)
+    {
+        
+        CustumPrincipal principal =
+            (CustumPrincipal) authentication.getPrincipal();
+
+
+        Utilisateur utilisateur =
+            principal.getUtilisateur();
+        
+        ProfileDto response = userService.getProfileInfo(utilisateur);
+
+        return ResponseEntity.ok(response);
+    } 
+
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileDto updateProfileDto ,Authentication authentication)
+    {
+        CustumPrincipal principal =
+            (CustumPrincipal) authentication.getPrincipal();
+
+
+        Utilisateur utilisateur =
+            principal.getUtilisateur();
+        
+        utilisateur = userService.updateProfile(updateProfileDto, utilisateur);
+
+        return ResponseEntity.ok(utilisateur);
     }
 }

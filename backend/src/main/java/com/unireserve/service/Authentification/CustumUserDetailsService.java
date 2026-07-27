@@ -21,6 +21,6 @@ public class CustumUserDetailsService implements UserDetailsService {
     {
         Utilisateur user = userRepository.findByMail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-        return (new CustumUserDetails(user));
+        return new CustumPrincipal(user);
     }
 }

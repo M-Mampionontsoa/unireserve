@@ -11,3 +11,4 @@ public class UpdateAssociationDto extends UpdateProfileDto {
 
     private String typeActivite;
 }
+ 

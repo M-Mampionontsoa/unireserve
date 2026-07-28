@@ -1,94 +1,103 @@
 package com.unireserve.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 
+import java.util.Map;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.unireserve.dto.TokenResponse;
 import com.unireserve.dto.AuthDTO;
 import com.unireserve.dto.LoginResponseDTO;
 import com.unireserve.dto.ProfileDto;
+import com.unireserve.dto.RegisterResponseDTO;
 import com.unireserve.dto.SigninDTO;
 import com.unireserve.dto.UpdateProfileDto;
 import com.unireserve.dto.UserInfoDTO;
 import com.unireserve.entity.Utilisateur;
 import com.unireserve.entity.Exception.UserAlreadyExistExpetion;
-import com.unireserve.repository.UserRepository;
 import com.unireserve.service.Authentification.AuthTokenService;
 import com.unireserve.service.Authentification.CustumPrincipal;
-import com.unireserve.service.Authentification.CustumUserDetails;
-import com.unireserve.service.Authentification.JwtService;
-import com.unireserve.service.Authentification.RefreshTokenService;
-import java.time.Duration;
-import java.net.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PutMapping;
-import com.unireserve.entity.RefreshToken;
 import com.unireserve.service.UserService;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 public class UserController {
     private UserService userService;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;  
     private final AuthTokenService authTokenService;
-    private final RefreshTokenService refreshTokenService; 
+    
     //private final Authentication authentication;
 
     public UserController(
             UserService userService,
-            AuthenticationManager authenticationManager,
-            JwtService jwtService,
-            RefreshTokenService refreshTokenService,AuthTokenService authTokenService) {
+            AuthenticationManager authenticationManager,AuthTokenService authTokenService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
         this.authTokenService=authTokenService;
     }
 
     @PostMapping("/signin")
     ResponseEntity<?> createUser(@RequestBody SigninDTO utilisateur) {
-        Map<String, Object> response = new HashMap<>();
+            RegisterResponseDTO response = new RegisterResponseDTO();
         
         try {
             Utilisateur newUser = userService.createUtilisateur(utilisateur);
+            response.setSuccess(true);
+            response.setMessage("Utilisateur créé avec succès");
+            response.setId(newUser.getId());
+            response.setNom(newUser.getNom());
+            response.setPrenom(newUser.getPrenom());
+            response.setUsername(newUser.getUsername());
+            response.setEmail(newUser.getMail());
+            response.setRole(newUser.getRole());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
-            response.put("success", true);
-            response.put("message", "Utilisateur créé avec succès");
-            response.put("data", newUser);
             
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
         } catch (UserAlreadyExistExpetion e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            response.put("data", null);
+            response.setSuccess(false);
+            response.setMessage("email ou nom d'utilisateur déja existant");
+            response.setId(null);
+            response.setNom(null);
+            response.setPrenom(null);
+            response.setUsername(null);
+            response.setEmail(null);
+            response.setRole(null);
             
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+          return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
             
         } catch (IllegalArgumentException e) {
-            response.put("success", false);
-            response.put("message", "Rôle invalide: " + e.getMessage());
-            response.put("data", null);
+            response.setSuccess(false);
+            response.setMessage("Argument incompatible");
+            response.setId(null);
+            response.setNom(null);
+            response.setPrenom(null);
+            response.setUsername(null);
+            response.setEmail(null);
+            response.setRole(null);
+            
             
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             
         } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Erreur lors de la création: " + e.getMessage());
-            response.put("data", null);
+            response.setSuccess(false);
+            response.setMessage("email ou nom d'utilisateur déja existant" + e.getMessage());
+            response.setId(null);
+            response.setNom(null);
+            response.setPrenom(null);
+            response.setUsername(null);
+            response.setEmail(null);
+            response.setRole(null);
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -106,6 +115,7 @@ public class UserController {
         userInfo.setUsername(user.getUsername());
         userInfo.setEmail(user.getMail());
         userInfo.setRole(user.getRole().name());
+        userInfo.setProfileCompleted(user.isProfileCompleted());
         
         return userInfo;
     }
@@ -116,31 +126,61 @@ public class UserController {
         try{
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authdto.getEmail(), authdto.getPassword()));
             
-            CustumUserDetails customUser = 
-            (CustumUserDetails) authentication.getPrincipal();
+            CustumPrincipal principal = (CustumPrincipal) authentication.getPrincipal();
 
-            Utilisateur user = customUser.getUtilisateur();
+            Utilisateur user = principal.getUtilisateur();
 
-            String token = jwtService.genererToken(user);
-            String refreshToken = refreshTokenService.creerPour(user);
+            TokenResponse tokens = authTokenService.generateTokens(user);
 
-            LoginResponseDTO responses = new LoginResponseDTO();
-            responses.setAccessToken(token);
-            responses.setRefreshToken(refreshToken);
-            responses.setTokenType("Bearer");
-            responses.setExpiresIn(3600000L);
-            
-            
-            responses.setUser(mapToUserInfo(user)); 
-            
+            authTokenService.setRefreshTokenCookie(
+                response,
+                tokens.getRefreshToken()
+            );
 
-            return ResponseEntity.ok(responses);
+            LoginResponseDTO dto = new LoginResponseDTO();
+
+            dto.setAccessToken(tokens.getToken());
+            dto.setTokenType("Bearer");
+            dto.setExpiresIn(3600000L);
+            dto.setUser(mapToUserInfo(user));
+
+            return ResponseEntity.ok(dto);
         }
         catch (Exception e) {
             e.printStackTrace();
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("error", e.getMessage()));
+        }
+    } 
+
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoDTO> me(
+            @AuthenticationPrincipal CustumPrincipal principal
+    ) {
+
+        Utilisateur user = principal.getUtilisateur();
+
+        return ResponseEntity.ok(mapToUserInfo(user));
+    }
+
+    
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken
+    ) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            // Renvoie 401 proprement au lieu d'une exception
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Refresh token absent"));
+        }
+    
+        try {
+            TokenResponse response = authTokenService.refresh(refreshToken);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Token invalide"));
         }
     }
 

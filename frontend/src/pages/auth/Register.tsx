@@ -14,11 +14,12 @@ export default function Register() {
     setApiError("");
     try {
       await registerUser(formData);
-      navigate("/salles"); // adapte vers ta route "Liste des salles"
+      navigate("/connexion");
     } catch (err) {
-      const message = isAxiosError(err) && err.response?.status === 409
-        ? "Cette adresse email est déjà utilisée."
-        : "Une erreur est survenue, réessaie.";
+      const message =
+        isAxiosError(err) && err.response?.status === 409
+          ? "Cette adresse email est déjà utilisée."
+          : "Une erreur est survenue, réessaie.";
       setApiError(message);
     }
   };
@@ -39,7 +40,10 @@ export default function Register() {
           {apiError}
         </div>
       )}
-      <RegisterPage onSubmit={handleSubmit} onSwitchToLogin={() => navigate("/connexion")} />
+      <RegisterPage
+        onSubmit={handleSubmit}
+        onSwitchToLogin={() => navigate("/connexion")}
+      />
     </>
   );
 }

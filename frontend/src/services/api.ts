@@ -5,14 +5,21 @@ import axios, {
 
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8081",
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // <-- indispensable
 });
 
-// Token gardé en mémoire (pas de localStorage pour l'instant, cf discussion précédente)
+// JWT en mémoire
 let currentToken: string | null = null;
 
 export function setAuthToken(token: string | null): void {
   currentToken = token;
+}
+
+export function getAuthToken(): string | null {
+  return currentToken;
 }
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {

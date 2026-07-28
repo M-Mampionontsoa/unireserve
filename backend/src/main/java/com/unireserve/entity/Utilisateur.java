@@ -57,4 +57,6 @@ public class Utilisateur {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+    @Column(nullable = false)
+    private boolean profileCompleted = false;
 }

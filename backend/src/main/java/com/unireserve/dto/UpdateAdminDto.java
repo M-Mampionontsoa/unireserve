@@ -11,3 +11,4 @@ public class UpdateAdminDto extends UpdateProfileDto {
 
     private String status;
 }
+ 

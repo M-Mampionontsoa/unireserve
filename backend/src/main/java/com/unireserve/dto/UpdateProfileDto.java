@@ -39,5 +39,7 @@ public class UpdateProfileDto {
     private String prenom;
     private String username;
     private String mail;
+    private boolean profileCompleted;
     
 }
+ 

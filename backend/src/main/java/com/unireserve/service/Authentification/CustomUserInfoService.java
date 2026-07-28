@@ -59,6 +59,7 @@ public class CustomUserInfoService extends OidcUserService{
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
             newUser.setRole(com.unireserve.entity.Role.PENDING);
+            newUser.setProfileCompleted(false);
 
             userFinal=userRepository.save(newUser);
             

@@ -1,24 +1,19 @@
 package com.unireserve.dto;
 
-
-
-import com.unireserve.entity.Role;
 import lombok.Data;
+import com.unireserve.entity.Role;
 
 @Data
-public class ProfileDto {
+public class RegisterResponseDTO {
 
+    private boolean success;
+    private String message;
     private Long id;
-
     private String nom;
-
     private String prenom;
-
     private String username;
-
-    private String mail;
-
+    private String email;
     private Role role;
 
-    private boolean profileCompleted;
-} 
+    
+}

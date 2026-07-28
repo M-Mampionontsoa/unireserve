@@ -14,7 +14,7 @@ export default function Login() {
     setApiError("");
     try {
       await loginUser(formData);
-      navigate("/salles"); // adapte vers ta route "Liste des salles"
+      navigate("/profile/update");
     } catch (err) {
       const message =
         isAxiosError(err) && err.response?.status === 401

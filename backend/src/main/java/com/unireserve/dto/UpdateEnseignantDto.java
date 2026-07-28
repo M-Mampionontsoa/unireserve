@@ -19,3 +19,4 @@ public class UpdateEnseignantDto extends UpdateProfileDto {
 
     private String matiereEnseignee;
 }
+ 

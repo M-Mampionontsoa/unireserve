@@ -1,84 +1,184 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { getMyProfile, updateMyProfile, ApiError } from "../api/userApi";
-import type { UserProfile, UpdateProfilePayload } from "../types/user";
-import styles from "./ProfilePage.module.css";
+import { useNavigate } from "react-router-dom";
+import { getMyProfile, updateMyProfile } from "../services/userApi";
+import { useAuth } from "../context/AuthContext";
+import type {
+  Niveau,
+  ProfileResponse,
+  RoleActif,
+  UpdateProfilePayload,
+} from "../types/user";
+import { ROLE_LABELS } from "../types/user";
+import styles from "../assets/ProfilePage.module.css";
 
-const ROLE_LABELS: Record<UserProfile["role"], string> = {
-  ETUDIANT: "Étudiant",
-  ENSEIGNANT: "Enseignant",
-  ADMIN: "Responsable logistique",
+const NIVEAUX: Niveau[] = ["L1", "L2", "L3", "M1", "M2"];
+const ROLES: RoleActif[] = ["ETUDIANT", "ENSEIGNANT", "ASSOCIATION", "ADMIN"];
+
+interface FormState {
+  nom: string;
+  prenom: string;
+  username: string;
+  mail: string;
+  faculte: string;
+  mention: string;
+  parcours: string;
+  numeroInscription: string;
+  niveau: Niveau | "";
+  numeroMatricule: string;
+  matiereEnseignee: string;
+  typeActivite: string;
+  status: string;
+}
+
+const EMPTY_FORM: FormState = {
+  nom: "",
+  prenom: "",
+  username: "",
+  mail: "",
+  faculte: "",
+  mention: "",
+  parcours: "",
+  numeroInscription: "",
+  niveau: "",
+  numeroMatricule: "",
+  matiereEnseignee: "",
+  typeActivite: "",
+  status: "",
 };
 
-const NIVEAUX = ["L1", "L2", "L3", "M1", "M2"] as const;
-
-type Status = "loading" | "viewing" | "editing" | "saving" | "error";
-
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [form, setForm] = useState<UpdateProfilePayload>({});
-  const [status, setStatus] = useState<Status>("loading");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<RoleActif | null>(null);
+  const [roleLocked, setRoleLocked] = useState(false); // rôle déjà défini côté backend -> non modifiable
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    if (!isAuthenticated) {
+      navigate("/connexion", { replace: true });
+      return;
+    }
 
     getMyProfile()
       .then((data) => {
-        if (cancelled) return;
-        setProfile(data);
-        setForm(stripReadOnlyFields(data));
-        setStatus("viewing");
+        if (data) {
+          applyProfile(data);
+
+          if (data.role !== "PENDING") {
+            setRoleLocked(true);
+          }
+        }
       })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setErrorMessage(
-          err instanceof ApiError ? err.message : "Une erreur est survenue."
-        );
-        setStatus("error");
-      });
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  function stripReadOnlyFields(data: UserProfile): UpdateProfilePayload {
-    const { id: _id, role: _role, email: _email, ...rest } = data;
-    return rest;
+  function applyProfile(data: ProfileResponse) {
+    setRole(data.role as RoleActif);
+    setForm({
+      nom: data.nom ?? "",
+      prenom: data.prenom ?? "",
+      username: data.username ?? "",
+      mail: data.mail ?? "",
+      faculte: data.faculte ?? "",
+      mention: data.mention ?? "",
+      parcours: data.parcours ?? "",
+      numeroInscription: data.numeroInscription ?? "",
+      niveau: data.niveau ?? "",
+      numeroMatricule: data.numeroMatricule ?? "",
+      matiereEnseignee: data.matiereEnseignee ?? "",
+      typeActivite: data.typeActivite ?? "",
+      status: data.status ?? "",
+    });
   }
 
-  function handleChange(field: keyof UpdateProfilePayload, value: string) {
+  function handleChange<K extends keyof FormState>(
+    field: K,
+    value: FormState[K],
+  ) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleCancel() {
-    if (profile) setForm(stripReadOnlyFields(profile));
-    setStatus("viewing");
-    setErrorMessage(null);
+  function buildPayload(): UpdateProfilePayload | null {
+    if (!role) return null;
+    const base = {
+      nom: form.nom,
+      prenom: form.prenom,
+      username: form.username,
+      mail: form.mail,
+    };
+
+    switch (role) {
+      case "ETUDIANT":
+        return {
+          type: "ETUDIANT",
+          ...base,
+          faculte: form.faculte,
+          mention: form.mention,
+          parcours: form.parcours,
+          numeroInscription: form.numeroInscription,
+          niveau: form.niveau,
+          profileCompleted: true,
+        };
+      case "ENSEIGNANT":
+        return {
+          type: "ENSEIGNANT",
+          ...base,
+          faculte: form.faculte,
+          mention: form.mention,
+          parcours: form.parcours,
+          numeroMatricule: form.numeroMatricule,
+          matiereEnseignee: form.matiereEnseignee,
+          profileCompleted: true,
+        };
+      case "ASSOCIATION":
+        return {
+          type: "ASSOCIATION",
+          ...base,
+          typeActivite: form.typeActivite,
+          profileCompleted: true,
+        };
+      case "ADMIN":
+        return {
+          type: "ADMIN",
+          ...base,
+          status: form.status,
+          profileCompleted: true,
+        };
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setStatus("saving");
-    setErrorMessage(null);
+    setError(null);
 
+    if (!role) {
+      setError("Sélectionne ton rôle avant d'enregistrer.");
+      return;
+    }
+
+    const payload = buildPayload();
+    if (!payload) return;
+
+    setSaving(true);
     try {
-      const updated = await updateMyProfile(form);
-      setProfile(updated);
-      setForm(stripReadOnlyFields(updated));
-      setStatus("viewing");
-      setSuccessMessage("Profil mis à jour.");
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      setErrorMessage(
-        err instanceof ApiError ? err.message : "La mise à jour a échoué."
-      );
-      setStatus("editing");
+      const updated = await updateMyProfile(payload);
+      applyProfile(updated);
+      setRoleLocked(true);
+      setSuccess("Profil enregistré.");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch {
+      setError("La mise à jour a échoué. Vérifie les champs et réessaie.");
+    } finally {
+      setSaving(false);
     }
   }
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className={styles.page}>
         <p className={styles.loading}>Chargement du profil…</p>
@@ -86,55 +186,52 @@ export default function ProfilePage() {
     );
   }
 
-  if (status === "error" && !profile) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.errorBox}>
-          <p>{errorMessage}</p>
-          <button
-            className={styles.secondaryButton}
-            onClick={() => window.location.reload()}
-          >
-            Réessayer
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) return null;
-
-  const isEditing = status === "editing" || status === "saving";
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Mon profil</h1>
-          <span className={styles.roleBadge}>{ROLE_LABELS[profile.role]}</span>
-        </div>
-        {!isEditing && (
-          <button
-            className={styles.primaryButton}
-            onClick={() => setStatus("editing")}
-          >
-            Modifier
-          </button>
-        )}
+        <h1 className={styles.title}>
+          {roleLocked ? "Mon profil" : "Complète ton profil"}
+        </h1>
+        {role && <span className={styles.roleBadge}>{ROLE_LABELS[role]}</span>}
       </header>
 
-      {successMessage && <div className={styles.successBox}>{successMessage}</div>}
-      {errorMessage && isEditing && (
-        <div className={styles.errorBox}>{errorMessage}</div>
+      {!roleLocked && (
+        <p className={styles.hint}>
+          Aucune information trouvée pour ce compte. Choisis ton rôle et
+          renseigne tes informations pour continuer.
+        </p>
       )}
 
+      {success && <div className={styles.successBox}>{success}</div>}
+      {error && <div className={styles.errorBox}>{error}</div>}
+
       <form className={styles.form} onSubmit={handleSubmit}>
-        <fieldset className={styles.fieldset} disabled={!isEditing}>
+        {!roleLocked && (
+          <fieldset className={styles.fieldset}>
+            <legend>Rôle</legend>
+            <div className={styles.roleGrid}>
+              {ROLES.map((r) => (
+                <button
+                  type="button"
+                  key={r}
+                  className={
+                    role === r ? styles.roleOptionActive : styles.roleOption
+                  }
+                  onClick={() => setRole(r)}
+                >
+                  {ROLE_LABELS[r]}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        <fieldset className={styles.fieldset}>
           <legend>Informations générales</legend>
 
           <Field label="Nom">
             <input
-              value={form.nom ?? ""}
+              value={form.nom}
               onChange={(e) => handleChange("nom", e.target.value)}
               required
             />
@@ -142,7 +239,7 @@ export default function ProfilePage() {
 
           <Field label="Prénom">
             <input
-              value={form.prenom ?? ""}
+              value={form.prenom}
               onChange={(e) => handleChange("prenom", e.target.value)}
               required
             />
@@ -150,52 +247,57 @@ export default function ProfilePage() {
 
           <Field label="Nom d'utilisateur">
             <input
-              value={form.nomUtilisateur ?? ""}
-              onChange={(e) => handleChange("nomUtilisateur", e.target.value)}
+              value={form.username}
+              onChange={(e) => handleChange("username", e.target.value)}
               required
             />
           </Field>
 
           <Field label="Email">
-            <input value={profile.email} disabled className={styles.readOnly} />
+            <input
+              type="email"
+              value={form.mail}
+              onChange={(e) => handleChange("mail", e.target.value)}
+              required
+            />
           </Field>
         </fieldset>
 
-        {(profile.role === "ETUDIANT" || profile.role === "ENSEIGNANT") && (
-          <fieldset className={styles.fieldset} disabled={!isEditing}>
+        {(role === "ETUDIANT" || role === "ENSEIGNANT") && (
+          <fieldset className={styles.fieldset}>
             <legend>Informations académiques</legend>
 
             <Field label="Faculté">
               <input
-                value={form.faculte ?? ""}
+                value={form.faculte}
                 onChange={(e) => handleChange("faculte", e.target.value)}
               />
             </Field>
 
             <Field label="Mention">
               <input
-                value={form.mention ?? ""}
+                value={form.mention}
                 onChange={(e) => handleChange("mention", e.target.value)}
               />
             </Field>
 
             <Field label="Parcours">
               <input
-                value={form.parcours ?? ""}
+                value={form.parcours}
                 onChange={(e) => handleChange("parcours", e.target.value)}
               />
             </Field>
 
-            {profile.role === "ETUDIANT" && (
+            {role === "ETUDIANT" && (
               <>
                 <Field label="Niveau">
                   <select
-                    value={form.niveau ?? ""}
-                    onChange={(e) => handleChange("niveau", e.target.value)}
+                    value={form.niveau}
+                    onChange={(e) =>
+                      handleChange("niveau", e.target.value as Niveau | "")
+                    }
                   >
-                    <option value="" disabled>
-                      Sélectionner…
-                    </option>
+                    <option value="">Sélectionner…</option>
                     {NIVEAUX.map((n) => (
                       <option key={n} value={n}>
                         {n}
@@ -206,7 +308,7 @@ export default function ProfilePage() {
 
                 <Field label="Numéro d'inscription">
                   <input
-                    value={form.numeroInscription ?? ""}
+                    value={form.numeroInscription}
                     onChange={(e) =>
                       handleChange("numeroInscription", e.target.value)
                     }
@@ -215,11 +317,11 @@ export default function ProfilePage() {
               </>
             )}
 
-            {profile.role === "ENSEIGNANT" && (
+            {role === "ENSEIGNANT" && (
               <>
                 <Field label="Matière enseignée">
                   <input
-                    value={form.matiereEnseignee ?? ""}
+                    value={form.matiereEnseignee}
                     onChange={(e) =>
                       handleChange("matiereEnseignee", e.target.value)
                     }
@@ -228,7 +330,7 @@ export default function ProfilePage() {
 
                 <Field label="Numéro matricule">
                   <input
-                    value={form.numeroMatricule ?? ""}
+                    value={form.numeroMatricule}
                     onChange={(e) =>
                       handleChange("numeroMatricule", e.target.value)
                     }
@@ -239,25 +341,39 @@ export default function ProfilePage() {
           </fieldset>
         )}
 
-        {isEditing && (
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              onClick={handleCancel}
-              disabled={status === "saving"}
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className={styles.primaryButton}
-              disabled={status === "saving"}
-            >
-              {status === "saving" ? "Enregistrement…" : "Enregistrer"}
-            </button>
-          </div>
+        {role === "ASSOCIATION" && (
+          <fieldset className={styles.fieldset}>
+            <legend>Informations association</legend>
+            <Field label="Type d'activité">
+              <input
+                value={form.typeActivite}
+                onChange={(e) => handleChange("typeActivite", e.target.value)}
+              />
+            </Field>
+          </fieldset>
         )}
+
+        {role === "ADMIN" && (
+          <fieldset className={styles.fieldset}>
+            <legend>Informations responsable logistique</legend>
+            <Field label="Statut">
+              <input
+                value={form.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              />
+            </Field>
+          </fieldset>
+        )}
+
+        <div className={styles.actions}>
+          <button
+            type="submit"
+            className={styles.primaryButton}
+            disabled={saving || !role}
+          >
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </button>
+        </div>
       </form>
     </div>
   );

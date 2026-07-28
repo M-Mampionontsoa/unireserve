@@ -2,9 +2,16 @@
   max-width: 640px;
   margin: 0 auto;
   padding: 32px 20px 64px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #1a1a1a;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  color: #111827;
+  background: #ffffff;
 }
+
+/* HEADER */
 
 .header {
   display: flex;
@@ -17,6 +24,7 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 6px;
+  color: #111827;
 }
 
 .roleBadge {
@@ -31,9 +39,56 @@
   border-radius: 999px;
 }
 
+/* ETAT */
+
 .loading {
-  color: #666;
+  color: #6b7280;
 }
+
+.hint {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+/* ROLES */
+
+.roleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.roleOption,
+.roleOptionActive {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.2s ease;
+}
+
+.roleOption {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+}
+
+.roleOption:hover {
+  border-color: #818cf8;
+  background: #f9fafb;
+}
+
+.roleOptionActive {
+  border: 1px solid #4338ca;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 600;
+}
+
+/* MESSAGES */
 
 .successBox {
   background: #ecfdf5;
@@ -55,6 +110,8 @@
   margin-bottom: 16px;
 }
 
+/* FORMULAIRE */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -68,6 +125,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  background: #ffffff;
 }
 
 .fieldset legend {
@@ -77,9 +135,7 @@
   padding: 0 6px;
 }
 
-.fieldset:disabled {
-  opacity: 0.85;
-}
+/* CHAMPS */
 
 .field {
   display: flex;
@@ -89,46 +145,93 @@
 
 .fieldLabel {
   font-size: 13px;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: #111827;
 }
 
 .field input,
 .field select {
-  padding: 9px 12px;
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 10px 12px;
+
   border: 1px solid #d1d5db;
   border-radius: 8px;
+
   font-size: 14px;
-  background: white;
+
+  background: #ffffff;
+  color: #111827;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
+.field input::placeholder {
+  color: #9ca3af;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+
+  border-color: #4338ca;
+
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
+}
+
+.field select option {
+  background: #ffffff;
+  color: #111827;
+}
+
+/* CHAMPS DESACTIVES */
 
 .field input:disabled,
 .field select:disabled {
   background: #f9fafb;
+
   color: #4b5563;
+
   border-color: #e5e7eb;
 }
 
 .readOnly {
   background: #f3f4f6 !important;
+
   color: #6b7280 !important;
 }
 
+/* ACTIONS */
+
 .actions {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 10px;
 }
 
 .primaryButton {
   background: #4338ca;
-  color: white;
+
+  color: #ffffff;
+
   border: none;
+
   padding: 10px 18px;
+
   border-radius: 8px;
+
   font-size: 14px;
+
   font-weight: 600;
+
   cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
 .primaryButton:hover {
@@ -137,17 +240,25 @@
 
 .primaryButton:disabled {
   opacity: 0.6;
+
   cursor: not-allowed;
 }
 
 .secondaryButton {
-  background: white;
+  background: #ffffff;
+
   color: #374151;
+
   border: 1px solid #d1d5db;
+
   padding: 10px 18px;
+
   border-radius: 8px;
+
   font-size: 14px;
+
   font-weight: 600;
+
   cursor: pointer;
 }
 

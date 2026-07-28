@@ -2,19 +2,34 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ProfilePage from "./pages/ProfilePage";
+import ProtectedRoute from "./router/ProtectedRoute";
+import GoogleCallback from "./pages/auth/GoogleCallback";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/connexion" replace />} />
+
           <Route path="/connexion" element={<Login />} />
+
           <Route path="/inscription" element={<Register />} />
-          {/* Prochaines routes : /salles, /reservations, /admin/* (protegees via ProtectedRoute) */}
+
+          <Route path="/callback" element={<GoogleCallback />} />
+
+          <Route
+            path="/profile/update"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

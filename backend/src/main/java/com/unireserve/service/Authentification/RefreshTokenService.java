@@ -37,6 +37,11 @@ public class RefreshTokenService {
             .filter(rt -> rt.getExpiration().isAfter(LocalDateTime.now()));
     }
 
+    public Optional<RefreshToken> find(String refreshToken)
+    {
+        return refreshTokenRepository.findByToken(refreshToken);
+    }
+
     public void revoquer(String token) {
         refreshTokenRepository.findByToken(token)
             .ifPresent(rt -> { 

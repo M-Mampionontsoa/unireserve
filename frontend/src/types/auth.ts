@@ -1,13 +1,36 @@
-export type Role = "ETUDIANT" | "ENSEIGNANT" | "ASSOCIATION" | "ADMIN";
+export type Role =
+  | "ETUDIANT"
+  | "ENSEIGNANT"
+  | "ASSOCIATION"
+  | "ADMIN"
+  | "PENDING";
 
 export interface AuthUser {
-  name: string;
-  firstName: string;
+  success: boolean;
+  message: String;
+  id: number;
+  nom: string;
+  prenom: string;
+  username: String;
+  email: String;
   role: Role;
 }
 
-export interface AuthResponse extends AuthUser {
-  token: string;
+export interface UserInfo {
+  id: number;
+  nom: string;
+  prenom: string;
+  username: string;
+  email: string;
+  role: Role;
+  profileCompleted: boolean;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: UserInfo;
 }
 
 export interface RegisterPayload {
@@ -22,4 +45,9 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
 }

@@ -20,3 +20,4 @@ public class UpdateEtudiantDto extends UpdateProfileDto {
 
     private Niveau niveau;
 }
+ 

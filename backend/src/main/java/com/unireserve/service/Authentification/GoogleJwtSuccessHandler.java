@@ -36,3 +36,4 @@ public class GoogleJwtSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect("http://localhost:5173/callback?token=" + tokens.getToken());
     }
 }
+ 

@@ -1,39 +1,83 @@
-export type Role = "ETUDIANT" | "ENSEIGNANT" | "ADMIN" | "ASSOCIATION";
+// Types alignés sur les DTOs réels du backend (com.unireserve.dto)
+// GET /profile -> ProfileDto (+ champs du sous-type selon "role")
+// PUT /profile/update -> UpdateProfileDto (discriminé par le champ "type")
 
-export interface BaseUser {
+export type RoleActif = "ETUDIANT" | "ENSEIGNANT" | "ASSOCIATION" | "ADMIN";
+// PENDING = compte Google fraîchement créé, rôle pas encore choisi
+export type Role = RoleActif | "PENDING";
+
+export type Niveau = "L1" | "L2" | "L3" | "M1" | "M2";
+
+export interface ProfileResponse {
   id: number;
   nom: string;
   prenom: string;
-  nomUtilisateur: string;
-  email: string;
+  username: string;
+  mail: string;
   role: Role;
-}
 
-export interface EtudiantProfile extends BaseUser {
-  role: "ETUDIANT";
+  profile_completed: boolean;
+
   faculte?: string;
   mention?: string;
   parcours?: string;
-  niveau?: "L1" | "L2" | "L3" | "M1" | "M2";
+
   numeroInscription?: string;
-}
+  niveau?: Niveau;
 
-export interface EnseignantProfile extends BaseUser {
-  role: "ENSEIGNANT";
-  faculte?: string;
-  mention?: string;
-  parcours?: string;
-  matiereEnseignee?: string;
   numeroMatricule?: string;
+  matiereEnseignee?: string;
+
+  typeActivite?: string;
+
+  status?: string;
 }
 
-export interface AdminProfile extends BaseUser {
-  role: "ADMIN";
+interface UpdateProfileBase {
+  nom: string;
+  prenom: string;
+  username: string;
+  mail: string;
+  profileCompleted: boolean;
 }
 
-export type UserProfile = EtudiantProfile | EnseignantProfile | AdminProfile;
+export interface UpdateEtudiantPayload extends UpdateProfileBase {
+  type: "ETUDIANT";
+  faculte: string;
+  mention: string;
+  parcours: string;
+  numeroInscription: string;
+  niveau: Niveau | "";
+}
 
-// Payload envoyé au PUT /api/users/me — id et role exclus (non modifiables ici)
-export type UpdateProfilePayload = Partial<
-  Omit<UserProfile, "id" | "role" | "email">
->;
+export interface UpdateEnseignantPayload extends UpdateProfileBase {
+  type: "ENSEIGNANT";
+  faculte: string;
+  mention: string;
+  parcours: string;
+  numeroMatricule: string;
+  matiereEnseignee: string;
+}
+
+export interface UpdateAssociationPayload extends UpdateProfileBase {
+  type: "ASSOCIATION";
+  typeActivite: string;
+}
+
+export interface UpdateAdminPayload extends UpdateProfileBase {
+  type: "ADMIN";
+  status: string;
+}
+
+export type UpdateProfilePayload =
+  | UpdateEtudiantPayload
+  | UpdateEnseignantPayload
+  | UpdateAssociationPayload
+  | UpdateAdminPayload;
+
+export const ROLE_LABELS: Record<RoleActif, string> = {
+  ETUDIANT: "Étudiant",
+  ENSEIGNANT: "Enseignant",
+  ASSOCIATION: "Association",
+  ADMIN: "Responsable logistique",
+};

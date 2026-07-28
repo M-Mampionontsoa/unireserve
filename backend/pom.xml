@@ -26,6 +26,13 @@
 
 	<dependencies>
 
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<!-- MapStruct -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -34,12 +41,7 @@
 		</dependency>
 
 
-		<!-- Lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
+		
 
 
 		<!-- Permet à Lombok et MapStruct de fonctionner ensemble -->

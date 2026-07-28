@@ -85,7 +85,7 @@ public class CustumPrincipal implements UserDetails,OidcUser {
             new SimpleGrantedAuthority(
                     "ROLE_" + utilisateur.getRole().name()
             )
-    );
+    ); 
     }
 
 

@@ -102,7 +102,7 @@ public class UserService {
         newUtilisateur.setUpdatedAt(LocalDateTime.now());
             
         return userRepository.save(newUtilisateur);
-    }
+    } 
 
     
     public ProfileDto getProfileInfo(Utilisateur utilisateur) {
@@ -130,6 +130,20 @@ public class UserService {
         if (user instanceof Admin a) {
 
             return adminMapper.toProfileDto(a);
+        }
+        if (user.getRole() == Role.PENDING) {
+
+            ProfileDto dto = new ProfileDto();
+
+            dto.setId(user.getId());
+            dto.setNom(user.getNom());
+            dto.setPrenom(user.getPrenom());
+            dto.setUsername(user.getUsername());
+            dto.setMail(user.getMail());
+            dto.setRole(user.getRole());
+            dto.setProfileCompleted(user.isProfileCompleted());
+
+            return dto;
         }
 
         throw new RuntimeException("Type d'utilisateur inconnu");
@@ -193,6 +207,7 @@ public class UserService {
         
             newUser.setCreatedAt(user.getCreatedAt());
             newUser.setUpdatedAt(LocalDateTime.now());
+            newUser.setProfileCompleted(false);
         
         
             userRepository.delete(user);

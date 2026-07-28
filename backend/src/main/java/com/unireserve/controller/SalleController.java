@@ -27,13 +27,13 @@ public class SalleController {
         this.salleService = salleService;
     }
 
-
+ 
     // Création d'une salle avec ses matériels
     @PostMapping
-    public ResponseEntity<Salle> createSalle(
+    public ResponseEntity<SalleResponseDto> createSalle(
             @RequestBody SalleRequestDto salleRequestDto)
     {
-        Salle salle = salleService.createSalle(salleRequestDto);
+        SalleResponseDto salle = salleService.createSalle(salleRequestDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

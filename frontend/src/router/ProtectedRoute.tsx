@@ -22,6 +22,13 @@ export default function ProtectedRoute({
       </div>
     );
   }
+  console.log("--- DEBUG PROTECTED ROUTE ---", {
+    loading,
+    isAuthenticated,
+    user,
+    roleActuel: user?.role,
+    rolesExiges: rolesAutorises,
+  });
 
   // 2. Si après le chargement, on n'a toujours pas de token -> vers la connexion
   if (!isAuthenticated) {

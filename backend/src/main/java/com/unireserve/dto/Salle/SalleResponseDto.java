@@ -13,5 +13,10 @@ public class SalleResponseDto {
 
     private int capacite;
 
+    private int quantite;
+
+    private String etat;
+
     private List<MaterielRequestDto> materiels;
 }
+ 

@@ -3,22 +3,21 @@ import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ProfilePage from "./pages/ProfilePage";
+import SallesPage from "./pages/SallesPage";
 import ProtectedRoute from "./router/ProtectedRoute";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 
 function App() {
   return (
+    // 1. BrowserRouter EN PREMIER pour activer le routage React
     <BrowserRouter>
+      {/* 2. AuthProvider EN SECOND pour que useNavigate() fonctionne dans AuthContext */}
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Navigate to="/connexion" replace />} />
-
           <Route path="/connexion" element={<Login />} />
-
           <Route path="/inscription" element={<Register />} />
-
           <Route path="/callback" element={<GoogleCallback />} />
-
           <Route
             path="/profile/update"
             element={
@@ -27,6 +26,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/salles"
+            element={
+              <ProtectedRoute rolesAutorises={["ADMIN"]}>
+                <SallesPage />
+              </ProtectedRoute>
+            }
+          />
+          {/* Prochaines routes : /reservations, /admin/* (protegees via ProtectedRoute) */}
         </Routes>
       </AuthProvider>
     </BrowserRouter>

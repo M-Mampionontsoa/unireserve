@@ -36,7 +36,7 @@ public class SalleService {
     }
 
     @Transactional
-    public Salle createSalle(SalleRequestDto salleRequestDto)
+    public SalleResponseDto createSalle(SalleRequestDto salleRequestDto)
     {
         Salle salle = salleMapper.toEntity(salleRequestDto);
 
@@ -44,7 +44,9 @@ public class SalleService {
             materiel.setSalles(List.of(salle));
         }
 
-        return salleRepository.save(salle);
+        Salle savedSalle = salleRepository.save(salle);
+
+        return salleMapper.toResponseDto(savedSalle);
 
     }
 

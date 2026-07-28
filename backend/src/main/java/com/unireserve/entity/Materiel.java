@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
 
 import java.util.List;
 
@@ -39,6 +40,13 @@ public class Materiel {
 
     @ManyToMany(mappedBy = "materiels")
     List<Salle> salles;
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        
+    }
 
     
 

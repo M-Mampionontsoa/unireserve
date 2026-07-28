@@ -25,23 +25,31 @@ public class Salle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    String nom;
+    private String nom;
 
-    String type;
+    private String type;
 
-    int capacite;
+    private int capacite;
 
-    int quantite;
+    private int quantite;
 
-    String etat;
+    private String etat;
 
-    LocalDateTime date_acquisition;
+    private LocalDateTime date_acquisition;
 
     @Column(name="created_at", nullable=false, updatable=false)
     private LocalDateTime createdAt;
 
     @Column(name="updated_at", nullable=false)
     private LocalDateTime updatedAt;
+
+
+    @jakarta.persistence.PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
 
     @PreUpdate
     public void preUpdate() {

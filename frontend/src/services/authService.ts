@@ -35,6 +35,15 @@ export async function refresh(): Promise<TokenResponse> {
   return data;
 }
 
-export function logout(): void {
-  setAuthToken(null);
+export async function logout(): Promise<void> {
+  try {
+    // Révoque le refresh token côté serveur et efface le cookie httpOnly.
+    // Best-effort : même si ça échoue (réseau down, cookie déjà absent...),
+    // on veut quand même vider la session locale ensuite.
+    await api.post("/logout");
+  } catch {
+    // rien à faire : on nettoie l'état local dans tous les cas (voir AuthContext.logout)
+  } finally {
+    setAuthToken(null);
+  }
 }

@@ -3,6 +3,7 @@ package com.unireserve.controller;
 
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,8 @@ import com.unireserve.entity.Utilisateur;
 import com.unireserve.entity.Exception.UserAlreadyExistExpetion;
 import com.unireserve.service.Authentification.AuthTokenService;
 import com.unireserve.service.Authentification.CustumPrincipal;
+import com.unireserve.service.Authentification.RefreshTokenService;
+import org.springframework.http.HttpHeaders;   
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.PutMapping;
 import com.unireserve.service.UserService;
@@ -34,15 +37,17 @@ public class UserController {
     private UserService userService;
     private final AuthenticationManager authenticationManager;
     private final AuthTokenService authTokenService;
+    private final RefreshTokenService refreshTokenService;
     
     //private final Authentication authentication;
 
     public UserController(
             UserService userService,
-            AuthenticationManager authenticationManager,AuthTokenService authTokenService) {
+            AuthenticationManager authenticationManager,AuthTokenService authTokenService,RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.authTokenService=authTokenService;
+        this.refreshTokenService=refreshTokenService;
     }
 
     @PostMapping("/signin")
@@ -170,7 +175,7 @@ public class UserController {
             @CookieValue(name = "refreshToken", required = false) String refreshToken
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            // Renvoie 401 proprement au lieu d'une exception
+            
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Refresh token absent"));
         }
@@ -213,5 +218,26 @@ public class UserController {
         utilisateur = userService.updateProfile(updateProfileDto, utilisateur);
 
         return ResponseEntity.ok(utilisateur);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response) {
+
+        if (refreshToken != null) {
+            refreshTokenService.revoquer(refreshToken); 
+        }
+
+        ResponseCookie expired = ResponseCookie.from("refreshToken", "")
+            .httpOnly(true)
+            .secure(false)
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(0)   // supprime le cookie côté navigateur
+            .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, expired.toString());
+
+        return ResponseEntity.ok().build();
     }
 }

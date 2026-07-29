@@ -14,7 +14,8 @@ export default function Login() {
     setApiError("");
     try {
       await loginUser(formData);
-      navigate("/profile/update");
+      // Pas de navigate() ici : AuthContext.loginUser() gère déjà la
+      // redirection (vers /profile/update ou /dashboard selon profileCompleted).
     } catch (err) {
       const message =
         isAxiosError(err) && err.response?.status === 401

@@ -211,6 +211,7 @@ public class UserService {
         
         
             userRepository.delete(user);
+            userRepository.flush();
         
         
             user = newUser;

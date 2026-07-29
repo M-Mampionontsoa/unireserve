@@ -28,7 +28,7 @@ interface AuthContextValue {
   registerUser: (payload: RegisterPayload) => Promise<AuthUser>;
   /** À appeler depuis la page /callback après un retour Google OAuth réussi */
   completeOAuthLogin: (token: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -40,6 +40,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // pour éviter la redirection prématurée vers /login pendant le F5.
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Seul endroit qui décide où on atterrit après une connexion réussie.
+  // Ne PAS dupliquer ce navigate() ailleurs (Login.tsx, GoogleCallback.tsx...)
+  // sous peine de faire la course entre deux navigate() concurrents.
+  const redirectAfterLogin = useCallback(
+    (profileCompleted: boolean) => {
+      navigate(profileCompleted ? "/dashboard" : "/profile/update");
+    },
+    [navigate],
+  );
 
   const loginUser = useCallback(
     async (credentials: LoginPayload) => {
@@ -58,16 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthToken(data.accessToken);
         setToken(data.accessToken);
 
-        data.user != null && !data.user.profileCompleted
-          ? navigate("/profile")
-          : navigate("/dashboard");
+        redirectAfterLogin(!!data.user?.profileCompleted);
 
         return data;
       } finally {
         setLoading(false);
       }
     },
-    [navigate],
+    [redirectAfterLogin],
   );
 
   const registerUser = useCallback(async (payload: RegisterPayload) => {
@@ -98,19 +106,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 4 - mettre l'utilisateur dans React
         setUser(user);
 
-        user.profileCompleted ? navigate("/profile") : navigate("/dashboard");
+        redirectAfterLogin(user.profileCompleted);
       } finally {
         setLoading(false);
       }
     },
-    [navigate],
+    [redirectAfterLogin],
   );
 
-  const logout = useCallback(() => {
-    setAuthToken(null);
+  const logout = useCallback(async () => {
+    // Révoque le refresh token côté serveur + efface le cookie httpOnly,
+    // avant de vider l'état local. authService.logout() est best-effort
+    // (ne rejette jamais) donc pas besoin de try/catch ici.
+    await authService.logout();
     setUser(null);
     setToken(null);
-  }, []);
+    navigate("/connexion", { replace: true });
+  }, [navigate]);
 
   const restoreSession = useCallback(async () => {
     setLoading(true); // On s'assure que le loading reste actif pendant la vérification
@@ -123,7 +135,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!newAccessToken) {
         console.warn("Aucun token trouvé dans la réponse /refresh");
-        logout();
+        setAuthToken(null);
+        setUser(null);
+        setToken(null);
         return;
       }
 
@@ -132,16 +146,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(newAccessToken);
 
       // 3. Charger les données utilisateur avec le nouveau token
-      const user = await authService.me();
-      setUser(user);
+      const freshUser = await authService.me();
+      setUser(freshUser);
     } catch (error) {
       console.warn("Session expirée ou non existante :", error);
-      logout();
+      // Pas de session valide : on nettoie l'état local seulement.
+      // On n'appelle pas /logout ici (pas de token valide à révoquer,
+      // et on ne veut pas de navigate() au tout premier chargement de l'app).
+      setAuthToken(null);
+      setUser(null);
+      setToken(null);
     } finally {
       // 💡 Crucial : On termine le chargement SEULEMENT quand tout est résolu (succès ou échec)
       setLoading(false);
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     restoreSession();

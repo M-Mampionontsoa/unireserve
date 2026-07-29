@@ -14,7 +14,7 @@ import jakarta.transaction.Transactional;
 
 import com.unireserve.entity.Salle;
 
-
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,5 +123,64 @@ public class SalleService {
         salleRepository.delete(salle);
     }
 
+    public List<SalleResponseDto> filterWithMinCapacity(int capacityMin)
+    {
+        List<Salle> salles = salleRepository.rechercherParCapacite(capacityMin);
+        List<SalleResponseDto> sallesResponse = new ArrayList<>();
+
+        
+        for ( Salle salle : salles) {
+            sallesResponse.add(salleMapper.toResponseDto(salle));
+        }
+
+        return sallesResponse;
+
+
+    }
+
+    public List<SalleResponseDto> filterPerType(String type)
+    {
+        List<Salle> salles = salleRepository.rechercherParType(type);
+        List<SalleResponseDto> sallesResponse = new ArrayList<>();
+
+        
+        for ( Salle salle : salles) {
+            sallesResponse.add(salleMapper.toResponseDto(salle));
+        }
+
+        return sallesResponse;
+
+
+    }
+
+    public List<SalleResponseDto> filterEquipement(String equipement)
+    {
+        List<Salle> salles = salleRepository.filterParEquipement(equipement);
+        List<SalleResponseDto> sallesResponse = new ArrayList<>();
+
+        
+        for ( Salle salle : salles) {
+            sallesResponse.add(salleMapper.toResponseDto(salle));
+        }
+
+        return sallesResponse;
+
+
+    }
+
+    public List<SalleResponseDto> filterCombinee(int capaciteMin,String type,String equipement)
+    {
+        List<Salle> salles = salleRepository.filtreCombinee(capaciteMin, type, equipement);
+        List<SalleResponseDto> sallesResponse = new ArrayList<>();
+
+        
+        for ( Salle salle : salles) {
+            sallesResponse.add(salleMapper.toResponseDto(salle));
+        }
+
+        return sallesResponse;
+
+
+    }
     
 }

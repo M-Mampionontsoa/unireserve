@@ -5,12 +5,11 @@ package com.unireserve.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.unireserve.dto.Salle.SalleRequestDto;
 import com.unireserve.dto.Salle.SalleResponseDto;
-import com.unireserve.entity.Salle;
 import com.unireserve.service.SalleService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -87,6 +86,33 @@ public class SalleController {
         salleService.deleteSalle(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<SalleResponseDto>> rechercherSalles(
+            @RequestParam(required = false) Integer capaciteMin,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String equipement) {
+
+        List<SalleResponseDto> resultats;
+
+        if (capaciteMin != null && type != null && equipement != null) {
+            resultats = salleService.filterCombinee(capaciteMin, type, equipement);
+
+        } else if (capaciteMin != null) {
+            resultats = salleService.filterWithMinCapacity(capaciteMin);
+
+        } else if (type != null) {
+            resultats = salleService.filterPerType(type);
+
+        } else if (equipement != null) {
+            resultats = salleService.filterEquipement(equipement);
+
+        } else {
+            return getAllSalle();
+        }
+
+        return ResponseEntity.ok(resultats);
     }
 
 }

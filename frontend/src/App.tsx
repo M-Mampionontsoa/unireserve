@@ -6,6 +6,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SallesPage from "./pages/SallesPage";
 import ProtectedRoute from "./router/ProtectedRoute";
 import GoogleCallback from "./pages/auth/GoogleCallback";
+import CataloguePage from "./pages/CataloguePage";
 
 function App() {
   return (
@@ -34,6 +35,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/catalogue"
+            element={
+              <ProtectedRoute>
+                <CataloguePage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Prochaines routes : /reservations, /admin/* (protegees via ProtectedRoute) */}
         </Routes>
       </AuthProvider>

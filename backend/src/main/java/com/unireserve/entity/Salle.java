@@ -19,7 +19,7 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 @Entity
 @Table(name = "salle")
-@Data
+@Data 
 public class Salle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

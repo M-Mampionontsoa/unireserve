@@ -1,6 +1,25 @@
 import api from "./api";
 import type { SalleResponse, SalleRequestPayload } from "../types/salle";
 
+export interface SalleFilters {
+  capaciteMin?: number;
+  type?: string;
+  equipement?: string;
+}
+
+export async function getSalles(
+  filters: SalleFilters = {},
+): Promise<SalleResponse[]> {
+  const params: Record<string, string | number> = {};
+  if (filters.capaciteMin) params.capaciteMin = filters.capaciteMin;
+  if (filters.type) params.type = filters.type;
+  if (filters.equipement) params.equipement = filters.equipement;
+
+  const { data } = await api.get<SalleResponse[]>("/salles/filter", { params });
+  console.log(data);
+  return data;
+}
+
 export async function getAllSalles(): Promise<SalleResponse[]> {
   const { data } = await api.get<SalleResponse[]>("/salles");
   console.log(data);

@@ -2,6 +2,7 @@ package com.unireserve.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -13,7 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.Customizer;
-
 import com.unireserve.service.Authentification.JwtAuthenticationFilter;
 import com.unireserve.service.Authentification.CustomUserInfoService;
 import com.unireserve.service.Authentification.GoogleJwtSuccessHandler;
@@ -44,7 +44,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/signin", "/refresh").permitAll()
                 // Protège /salles ET tous ses sous-dossiers (/salles/1, /salles/create...)
-                .requestMatchers("/salles/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/salles/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/salles/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/salles/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/salles/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

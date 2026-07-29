@@ -23,5 +23,8 @@ public class Admin extends Utilisateur {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_admin")
     private List<Salle> salles;
+
+    @OneToMany(mappedBy = "admin")
+    private List<Reservation> reservationsValidees;
 }
 

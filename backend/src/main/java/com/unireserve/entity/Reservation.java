@@ -2,41 +2,41 @@ package com.unireserve.entity;
 
 import java.time.LocalDateTime;
 
-
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import lombok.Data;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PreUpdate;
-import java.util.List;
-import jakarta.persistence.CascadeType;
+
 @Entity
-@Table(name = "salle")
-@Data 
-public class Salle {
+@Data
+@Table(name = "reservation")
+public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nom;
+    private LocalDateTime debut;
 
-    private String type;
+    private LocalDateTime fin;
 
-    private int capacite;
 
-    private int quantite;
+    @Enumerated(EnumType.STRING)
+    private Type_reservation type_reservation;
 
-    private String etat;
+    @Enumerated(EnumType.STRING)
+    private Statut_reservation statut;
 
-    private LocalDateTime date_acquisition;
+    private String motif_refus;
+
+    private LocalDateTime valide_le;
 
     @Column(name="created_at", nullable=false, updatable=false)
     private LocalDateTime createdAt;
@@ -57,11 +57,16 @@ public class Salle {
         updatedAt = LocalDateTime.now();
     }
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "salle_materiel",joinColumns = @JoinColumn(name="id_salle"),inverseJoinColumns = @JoinColumn(name = "id_materiel"))
-    private List<Materiel> materiels;
+    @ManyToOne
+    @JoinColumn(name="id_utilisateur")
+    private Utilisateur utilisateur;
 
-    @OneToMany(mappedBy = "salle")
-    private List<Reservation> reservations;
+    @ManyToOne
+    @JoinColumn(name = "id_salle")
+    private Salle salle;
+
+    @ManyToOne
+    @JoinColumn(name = "id_admin_validateur")
+    private Admin admin;
     
 }

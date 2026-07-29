@@ -1,0 +1,17 @@
+package com.unireserve.dto.Reservation;
+
+import lombok.Data;
+import java.time.LocalDateTime;
+import com.unireserve.entity.Type_reservation;
+
+@Data
+public class ReservationResponseDto {
+    private LocalDateTime debut;
+    private LocalDateTime fin;
+    private Type_reservation type_reservation;
+    private String salleNom;
+    
+
+}
+
+

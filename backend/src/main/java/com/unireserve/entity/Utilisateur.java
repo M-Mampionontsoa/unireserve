@@ -7,12 +7,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
 import java.time.LocalDateTime;
-
+import java.util.List;
 import jakarta.persistence.Column;
 import lombok.Data;
 
@@ -59,4 +60,7 @@ public class Utilisateur {
     }
     @Column(nullable = false)
     private boolean profileCompleted = false;
+
+    @OneToMany(mappedBy = "utilisateur")
+    private List<Reservation> reservations;
 }

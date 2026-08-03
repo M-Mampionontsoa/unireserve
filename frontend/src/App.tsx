@@ -7,6 +7,7 @@ import SallesPage from "./pages/SallesPage";
 import ProtectedRoute from "./router/ProtectedRoute";
 import GoogleCallback from "./pages/auth/GoogleCallback";
 import CataloguePage from "./pages/CataloguePage";
+import ReservationCalendarPage from "./pages/ReservationCalendarPage";
 
 function App() {
   return (
@@ -40,6 +41,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CataloguePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservations"
+            element={
+              <ProtectedRoute>
+                <ReservationCalendarPage />
               </ProtectedRoute>
             }
           />

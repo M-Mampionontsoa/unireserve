@@ -42,7 +42,7 @@ public class ReservationService {
         }
         
         
-        Salle salle = salleRepository.findById(reservation.getId_salle())
+        Salle salle = salleRepository.trouverAvecVerrou(reservation.getId_salle())
             .orElseThrow(() -> new RuntimeException("Salle non trouvée avec l'ID: " + reservation.getId_salle()));
         
         

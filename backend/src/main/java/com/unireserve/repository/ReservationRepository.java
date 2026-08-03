@@ -9,6 +9,7 @@ import com.unireserve.entity.Reservation;
 
 
 
+
 public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     @Query("SELECT COUNT(r) > 0 FROM Reservation r " +
            "WHERE r.salle.id = :salleId " +
@@ -21,4 +22,6 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
         @Param("fin") LocalDateTime fin
     );
     List<Reservation> findBySalleId(Long id);
+
+    
 }

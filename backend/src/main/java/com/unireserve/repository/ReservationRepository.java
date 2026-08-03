@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import com.unireserve.entity.Reservation;
-
+import com.unireserve.entity.Statut_reservation;
 
 
 
@@ -23,5 +23,6 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     );
     List<Reservation> findBySalleId(Long id);
 
+    List<Reservation> findByStatut(Statut_reservation statut);
     
 }

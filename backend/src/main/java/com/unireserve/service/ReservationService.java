@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.unireserve.dto.Reservation.ReservationMapperDto;
 import com.unireserve.dto.Reservation.ReservationRequest;
+import com.unireserve.entity.Admin;
 import com.unireserve.entity.Reservation;
 import com.unireserve.entity.Role;
 import com.unireserve.entity.Salle;
 import com.unireserve.entity.Statut_reservation;
+import com.unireserve.entity.Type_reservation;
 import com.unireserve.entity.Utilisateur;
 
 @Service
@@ -95,6 +97,64 @@ public class ReservationService {
 
         return reservationList;
     }
+
+    public List<ReservationResponseDto> getReservationByStatus(Statut_reservation statut_reservation)
+    {
+        List<ReservationResponseDto> reservationList = new ArrayList<>();
+
+        List<Reservation> reservations = reservationRepository.findByStatut(statut_reservation);
+
+        for (Reservation  reservation : reservations) {
+            
+            reservationList.add(reservationMapperDto.toResponseDto(reservation));
+            
+        }
+
+        return reservationList;
+    }
+
+    public ReservationResponseDto validateReservation(Long id,Statut_reservation status,String motif)
+    {
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(() -> new RuntimeException("Reservation not found"));
+        reservation.setStatut(status);
+        if(status == Statut_reservation.REFUSEE)
+        {
+            reservation.setMotif_refus(motif);
+        }
+
+
+
+        reservationRepository.save(reservation);
+        return reservationMapperDto.toResponseDto(reservation);
+
+    }
+
+    @Transactional
+    public ReservationResponseDto blocking(ReservationRequest request,Admin admin)
+    {
+        Salle salle = salleRepository.trouverAvecVerrou(request.getId_salle())
+            .orElseThrow(() -> new RuntimeException("Salle non trouvée avec l'ID: " + request.getId_salle()));
+        
+        
+        if (request.getFin().isBefore(request.getDebut()) || request.getFin().equals(request.getDebut())) {
+            throw new RuntimeException("La date de fin doit être après la date de début");
+        }
+
+        Reservation reservation = reservationMapperDto.toEntity(request);
+        reservation.setDebut(request.getDebut());
+        reservation.setFin(request.getFin());
+        reservation.setType_reservation(Type_reservation.BLOCAGE);
+        reservation.setStatut(Statut_reservation.CONFIRMEE);
+        reservation.setAdmin(admin);
+        reservation.setUtilisateur(admin);
+        reservation.setSalle(salle);
+
+        reservationRepository.save(reservation);
+
+        return reservationMapperDto.toResponseDto(reservation);
+
+    }
+
 
 
 }

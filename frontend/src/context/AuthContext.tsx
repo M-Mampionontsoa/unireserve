@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // sous peine de faire la course entre deux navigate() concurrents.
   const redirectAfterLogin = useCallback(
     (profileCompleted: boolean) => {
-      navigate(profileCompleted ? "/dashboard" : "/profile/update");
+      navigate(profileCompleted ? "/" : "/profile/update");
     },
     [navigate],
   );

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -9,6 +9,9 @@ import GoogleCallback from "./pages/auth/GoogleCallback";
 import CataloguePage from "./pages/CataloguePage";
 import ReservationCalendarPage from "./pages/ReservationCalendarPage";
 import ModerationPage from "./pages/ModerationPage";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import Layout from "./components/layout/Layout";
 
 function App() {
   return (
@@ -17,15 +20,36 @@ function App() {
       {/* 2. AuthProvider EN SECOND pour que useNavigate() fonctionne dans AuthContext */}
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/connexion" replace />} />
+          {/* Pages d'authentification : mise en page pleine hauteur dédiée,
+              avec leur propre navigation intégrée (voir AuthPages.tsx) */}
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<Register />} />
           <Route path="/callback" element={<GoogleCallback />} />
+
+          {/* Toutes les autres pages partagent la navbar persistante */}
+          <Route
+            path="/"
+            element={
+              <Layout>
+                <HomePage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/a-propos"
+            element={
+              <Layout>
+                <AboutPage />
+              </Layout>
+            }
+          />
           <Route
             path="/profile/update"
             element={
               <ProtectedRoute>
-                <ProfilePage />
+                <Layout>
+                  <ProfilePage />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -33,7 +57,9 @@ function App() {
             path="/salles"
             element={
               <ProtectedRoute rolesAutorises={["ADMIN"]}>
-                <SallesPage />
+                <Layout>
+                  <SallesPage />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -41,7 +67,9 @@ function App() {
             path="/catalogue"
             element={
               <ProtectedRoute>
-                <CataloguePage />
+                <Layout>
+                  <CataloguePage />
+                </Layout>
               </ProtectedRoute>
             }
           />
@@ -49,21 +77,22 @@ function App() {
             path="/reservations"
             element={
               <ProtectedRoute>
-                <ReservationCalendarPage />
+                <Layout>
+                  <ReservationCalendarPage />
+                </Layout>
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/moderation"
             element={
               <ProtectedRoute rolesAutorises={["ADMIN"]}>
-                <ModerationPage />
+                <Layout>
+                  <ModerationPage />
+                </Layout>
               </ProtectedRoute>
             }
           />
-
-          {/* Prochaines routes : /reservations, /admin/* (protegees via ProtectedRoute) */}
         </Routes>
       </AuthProvider>
     </BrowserRouter>

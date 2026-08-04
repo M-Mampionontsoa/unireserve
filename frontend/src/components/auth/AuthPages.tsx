@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import type { LoginPayload, RegisterPayload } from "../../types/auth";
 
 const styles = `
@@ -357,13 +358,13 @@ function TopNav({
 }) {
   return (
     <div className="ur-nav">
-      <div className="ur-logo ur-display">
+      <Link to="/" className="ur-logo ur-display" style={{ textDecoration: "none" }}>
         <LogoMark />
         UniReserve
-      </div>
+      </Link>
       <div className="ur-nav-links">
-        <a href="#contact">Contact</a>
-        <a href="#apropos">À propos</a>
+        <Link to="/">Accueil</Link>
+        <Link to="/a-propos">À propos</Link>
         <button onClick={onSwitch}>
           {mode === "register" ? "Se connecter" : "S'inscrire"}
         </button>

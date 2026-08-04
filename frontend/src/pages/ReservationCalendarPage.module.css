@@ -1,9 +1,11 @@
 .page {
   max-width: 720px;
   margin: 0 auto;
+  width: 100%;
+  background: var(--paper);
   padding: 32px 20px 64px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .header {
@@ -55,21 +57,21 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--ink-soft);
   min-width: 180px;
 }
 
 .field select,
 .field input {
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 14px;
   background: white;
 }
 
 .loading {
-  color: #6b7280;
+  color: var(--ink-soft);
 }
 
 .errorBox {
@@ -123,19 +125,19 @@
 
 .slotBusy {
   background: #f3f4f6;
-  border-color: #e5e7eb;
+  border-color: var(--line);
   color: #9ca3af;
   cursor: not-allowed;
 }
 
 .slotSelected {
-  background: #4338ca;
-  border-color: #4338ca;
+  background: var(--primary);
+  border-color: var(--primary);
   color: white;
 }
 
 .bookingPanel {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -157,7 +159,7 @@
 }
 
 .primaryButton {
-  background: #4338ca;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 9px 16px;
@@ -168,7 +170,7 @@
 }
 
 .primaryButton:hover {
-  background: #3730a3;
+  background: var(--primary-deep);
 }
 
 .primaryButton:disabled {
@@ -178,8 +180,8 @@
 
 .secondaryButton {
   background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
   padding: 9px 16px;
   border-radius: 8px;
   font-size: 14px;
@@ -188,5 +190,5 @@
 }
 
 .secondaryButton:hover {
-  background: #f9fafb;
+  background: var(--primary-wash);
 }

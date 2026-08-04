@@ -55,7 +55,6 @@ export default function ProfilePage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -169,8 +168,7 @@ export default function ProfilePage() {
       const updated = await updateMyProfile(payload);
       applyProfile(updated);
       setRoleLocked(true);
-      setSuccess("Profil enregistré.");
-      setTimeout(() => setSuccess(null), 3000);
+      navigate("/");
     } catch {
       setError("La mise à jour a échoué. Vérifie les champs et réessaie.");
     } finally {
@@ -202,7 +200,6 @@ export default function ProfilePage() {
         </p>
       )}
 
-      {success && <div className={styles.successBox}>{success}</div>}
       {error && <div className={styles.errorBox}>{error}</div>}
 
       <form className={styles.form} onSubmit={handleSubmit}>

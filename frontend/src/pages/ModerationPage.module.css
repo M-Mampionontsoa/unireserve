@@ -1,9 +1,11 @@
 .page {
   max-width: 720px;
   margin: 0 auto;
+  width: 100%;
+  background: var(--paper);
   padding: 32px 20px 64px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .header {
@@ -20,8 +22,8 @@
 }
 
 .countBadge {
-  background: #eef2ff;
-  color: #3730a3;
+  background: var(--primary-wash);
+  color: var(--primary-deep);
   font-size: 13px;
   font-weight: 700;
   padding: 2px 10px;
@@ -30,7 +32,7 @@
 
 .loading,
 .empty {
-  color: #6b7280;
+  color: var(--ink-soft);
 }
 
 .successBox {
@@ -64,7 +66,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px 16px;
   background: white;
@@ -85,7 +87,7 @@
 
 .periode {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ink-soft);
   margin: 0;
 }
 
@@ -136,8 +138,8 @@
 
 .secondaryButton {
   background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 13px;
@@ -146,7 +148,7 @@
 }
 
 .secondaryButton:hover {
-  background: #f9fafb;
+  background: var(--primary-wash);
 }
 
 /* ---- Modale de refus ---- */
@@ -178,7 +180,7 @@
 
 .modalSubtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ink-soft);
   margin: 0 0 16px;
 }
 
@@ -188,13 +190,13 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: var(--ink-soft);
   margin-bottom: 16px;
 }
 
 .field textarea {
   padding: 9px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;

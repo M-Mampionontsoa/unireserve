@@ -14,6 +14,7 @@ public class ReservationResponseDto {
     private Type_reservation type_reservation;
     private String salleNom;
     private Statut_reservation statut;
+    private String warning;
     
 
 }

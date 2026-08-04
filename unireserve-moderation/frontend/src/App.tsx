@@ -53,7 +53,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/moderation"
             element={
@@ -63,7 +62,7 @@ function App() {
             }
           />
 
-          {/* Prochaines routes : /reservations, /admin/* (protegees via ProtectedRoute) */}
+          {/* Prochaines routes : /admin/* (protegees via ProtectedRoute) */}
         </Routes>
       </AuthProvider>
     </BrowserRouter>

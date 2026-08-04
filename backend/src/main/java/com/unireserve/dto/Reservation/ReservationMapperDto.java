@@ -19,6 +19,7 @@ public interface  ReservationMapperDto {
     Reservation toEntity(ReservationRequest request);
 
     @Mapping(target = "salleNom",ignore = true)
+    @Mapping(target = "warning",ignore = true)
     ReservationResponseDto toResponseDto(Reservation reservation);
 }
  

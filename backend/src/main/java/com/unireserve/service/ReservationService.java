@@ -3,14 +3,17 @@ package com.unireserve.service;
 import com.unireserve.dto.Reservation.ReservationResponseDto;
 import com.unireserve.repository.ReservationRepository;
 import com.unireserve.repository.SalleRepository;
+import com.unireserve.service.Mail.MailService;
 
 import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 
+import com.unireserve.dto.Reservation.OccupationStat;
 import com.unireserve.dto.Reservation.ReservationMapperDto;
 import com.unireserve.dto.Reservation.ReservationRequest;
 import com.unireserve.entity.Admin;
@@ -20,18 +23,23 @@ import com.unireserve.entity.Salle;
 import com.unireserve.entity.Statut_reservation;
 import com.unireserve.entity.Type_reservation;
 import com.unireserve.entity.Utilisateur;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class ReservationService {
     private ReservationRepository reservationRepository;
     private ReservationMapperDto reservationMapperDto;
     private SalleRepository salleRepository;
+    private MailService mailService;
+    private static final Logger logger = LoggerFactory.getLogger(ReservationService.class);
 
-    public ReservationService(ReservationRepository reservationRepository,ReservationMapperDto reservationMapperDto,SalleRepository salleRepository)
+    public ReservationService(ReservationRepository reservationRepository,ReservationMapperDto reservationMapperDto,SalleRepository salleRepository,MailService mailService)
     {
         this.reservationRepository = reservationRepository;
         this.reservationMapperDto = reservationMapperDto;
         this.salleRepository = salleRepository;
+        this.mailService = mailService;
         
     }
 
@@ -57,6 +65,7 @@ public class ReservationService {
             if(utilisateur.getRole() == Role.ENSEIGNANT || utilisateur.getRole() == Role.ADMIN )
             {
                 reservationAFaire.setStatut(Statut_reservation.CONFIRMEE);
+                
             }
             else if(utilisateur.getRole() == Role.ASSOCIATION || utilisateur.getRole() == Role.ETUDIANT)
             {
@@ -69,8 +78,22 @@ public class ReservationService {
             reservationAFaire.setSalle(salle);
 
             reservationRepository.save(reservationAFaire);
+            ReservationResponseDto response = reservationMapperDto.toResponseDto(reservationAFaire);
+            if(response.getStatut() == Statut_reservation.CONFIRMEE)
+            {
+                try
+                {
+                    mailService.SendMailConfirmation(utilisateur.getMail(),response);
+                }
+                catch(MailException e)
+                {
+                    logger.error("Erreur lors de l'envoi du mail", e);
+                    response.setWarning("Réservation validée mais echec de l'envoie du mail");
+                    
+                }
+            }
 
-            return reservationMapperDto.toResponseDto(reservationAFaire);
+            return response;
 
         }
         else
@@ -113,6 +136,7 @@ public class ReservationService {
         return reservationList;
     }
 
+    @Transactional
     public ReservationResponseDto validateReservation(Long id,Statut_reservation status,String motif)
     {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(() -> new RuntimeException("Reservation not found"));
@@ -122,10 +146,39 @@ public class ReservationService {
             reservation.setMotif_refus(motif);
         }
 
-
+        
 
         reservationRepository.save(reservation);
-        return reservationMapperDto.toResponseDto(reservation);
+        ReservationResponseDto response=reservationMapperDto.toResponseDto(reservation);
+        if(response.getStatut() == Statut_reservation.CONFIRMEE)
+        {
+            try
+            {
+                mailService.SendMailConfirmation(reservation.getUtilisateur().getMail(),response);
+            }
+            catch(MailException e)
+            {
+                logger.error("Erreur lors de l'envoi du mail", e);
+                response.setWarning("Réservation validée mais echec de l'envoie du mail");
+                
+            }
+        }
+        else
+        {
+            try
+            {
+                mailService.SendMailRefuse(reservation.getUtilisateur().getMail(),response,motif);
+            }
+            catch(MailException e)
+            {
+                logger.error("Erreur lors de l'envoi du mail", e);
+                response.setWarning("Réservation refusée mais echec de l'envoie du mail");
+                
+            }
+        }
+        
+
+        return response;
 
     }
 
@@ -154,6 +207,8 @@ public class ReservationService {
         return reservationMapperDto.toResponseDto(reservation);
 
     }
+
+    
 
 
 

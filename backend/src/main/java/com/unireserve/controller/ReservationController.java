@@ -98,7 +98,7 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}/refuser")
-    public ResponseEntity<?> refuserReservation(@RequestParam Long id,@RequestBody String motif)
+    public ResponseEntity<?> refuserReservation(@PathVariable Long id,@RequestBody String motif)
     {   
         ReservationResponseDto responseDto = reservationService.validateReservation(id,Statut_reservation.REFUSEE, motif);
 
@@ -106,7 +106,7 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}/valider")
-    public ResponseEntity<?> validerReservation(@RequestParam Long id)
+    public ResponseEntity<?> validerReservation(@PathVariable Long id)
     {   
         ReservationResponseDto responseDto = reservationService.validateReservation(id,Statut_reservation.CONFIRMEE,null);
 

@@ -8,6 +8,7 @@ import com.unireserve.entity.Type_reservation;
 
 @Data
 public class ReservationResponseDto {
+    private Long id;
     private LocalDateTime debut;
     private LocalDateTime fin;
     private Type_reservation type_reservation;

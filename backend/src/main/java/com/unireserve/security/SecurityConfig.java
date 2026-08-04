@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/salles/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/salles/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/salles/**").hasRole("ADMIN")
-                .requestMatchers("/reservations/enAttente","/reservations/refuse","/reservations/valide","/reservations/*/refuser","/reservation/*/valider","/reservation/block").hasRole("ADMIN")
+                .requestMatchers("/reservations/enAttente","/reservations/refuse","/reservations/valide","/reservations/*/refuser","/reservations/*/valider","/reservations/block").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception

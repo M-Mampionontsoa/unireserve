@@ -7,7 +7,10 @@ import type {
 export async function createReservation(
   payload: ReservationRequestPayload,
 ): Promise<ReservationResponse> {
-  const { data } = await api.post<ReservationResponse>("/reservations", payload);
+  const { data } = await api.post<ReservationResponse>(
+    "/reservations",
+    payload,
+  );
   return data;
 }
 
@@ -22,23 +25,36 @@ export async function getReservationsForSalle(
 
 // ---- Modération (ADMIN) ----
 
-export async function getReservationsEnAttente(): Promise<ReservationResponse[]> {
-  const { data } = await api.get<ReservationResponse[]>("/reservations/enAttente");
+export async function getReservationsEnAttente(): Promise<
+  ReservationResponse[]
+> {
+  const { data } = await api.get<ReservationResponse[]>(
+    "/reservations/enAttente",
+  );
+  console.group(data);
   return data;
 }
 
-export async function getReservationsRefusees(): Promise<ReservationResponse[]> {
+export async function getReservationsRefusees(): Promise<
+  ReservationResponse[]
+> {
   const { data } = await api.get<ReservationResponse[]>("/reservations/refuse");
   return data;
 }
 
-export async function getReservationsValidees(): Promise<ReservationResponse[]> {
+export async function getReservationsValidees(): Promise<
+  ReservationResponse[]
+> {
   const { data } = await api.get<ReservationResponse[]>("/reservations/valide");
   return data;
 }
 
-export async function validerReservation(id: number): Promise<ReservationResponse> {
-  const { data } = await api.put<ReservationResponse>(`/reservations/${id}/valider`);
+export async function validerReservation(
+  id: number,
+): Promise<ReservationResponse> {
+  const { data } = await api.put<ReservationResponse>(
+    `/reservations/${id}/valider`,
+  );
   return data;
 }
 
@@ -59,6 +75,9 @@ export async function refuserReservation(
 export async function blockSalle(
   payload: ReservationRequestPayload,
 ): Promise<ReservationResponse> {
-  const { data } = await api.post<ReservationResponse>("/reservations/block", payload);
+  const { data } = await api.post<ReservationResponse>(
+    "/reservations/block",
+    payload,
+  );
   return data;
 }

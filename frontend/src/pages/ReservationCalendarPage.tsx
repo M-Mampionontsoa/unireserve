@@ -26,7 +26,6 @@ function todayIso(): string {
 }
 
 function toLocalDateTimeString(date: Date): string {
-  // "yyyy-MM-ddTHH:mm:ss" attendu par le backend (LocalDateTime)
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
     `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
@@ -34,7 +33,10 @@ function toLocalDateTimeString(date: Date): string {
   );
 }
 
-function buildSlots(dateIso: string, reservations: ReservationResponse[]): Slot[] {
+function buildSlots(
+  dateIso: string,
+  reservations: ReservationResponse[],
+): Slot[] {
   const slots: Slot[] = [];
   const [year, month, day] = dateIso.split("-").map(Number);
 
@@ -103,7 +105,8 @@ export default function ReservationCalendarPage() {
         if (!cancelled) setReservations(data);
       })
       .catch(() => {
-        if (!cancelled) setError("Impossible de charger les réservations de cette salle.");
+        if (!cancelled)
+          setError("Impossible de charger les réservations de cette salle.");
       })
       .finally(() => {
         if (!cancelled) setLoadingReservations(false);
@@ -187,7 +190,8 @@ export default function ReservationCalendarPage() {
         }
       } else if (axios.isAxiosError(err) && err.response?.status === 400) {
         setError(
-          err.response.data?.error ?? "Créneau invalide. Vérifie les horaires choisis.",
+          err.response.data?.error ??
+            "Créneau invalide. Vérifie les horaires choisis.",
         );
       } else {
         setError("La réservation a échoué. Réessaie dans un instant.");

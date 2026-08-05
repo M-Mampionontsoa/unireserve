@@ -7,6 +7,7 @@ import com.unireserve.service.Mail.MailService;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,10 @@ public class ReservationService {
         Salle salle = salleRepository.trouverAvecVerrou(reservation.getId_salle())
             .orElseThrow(() -> new RuntimeException("Salle non trouvée avec l'ID: " + reservation.getId_salle()));
         
+        if (reservation.getDebut().isBefore(LocalDateTime.now().minusMinutes(1))) {
+            throw new RuntimeException("Impossible de réserver dans le passé");
+        }
+
         
         if (reservation.getFin().isBefore(reservation.getDebut()) || reservation.getFin().equals(reservation.getDebut())) {
             throw new RuntimeException("La date de fin doit être après la date de début");
@@ -79,13 +84,14 @@ public class ReservationService {
 
             reservationRepository.save(reservationAFaire);
             ReservationResponseDto response = reservationMapperDto.toResponseDto(reservationAFaire);
+            response.setSalleNom(reservationAFaire.getSalle().getNom());
             if(response.getStatut() == Statut_reservation.CONFIRMEE)
             {
                 try
                 {
                     mailService.SendMailConfirmation(utilisateur.getMail(),response);
                 }
-                catch(MailException e)
+                catch(Exception e)
                 {
                     logger.error("Erreur lors de l'envoi du mail", e);
                     response.setWarning("Réservation validée mais echec de l'envoie du mail");
@@ -129,7 +135,9 @@ public class ReservationService {
 
         for (Reservation  reservation : reservations) {
             
-            reservationList.add(reservationMapperDto.toResponseDto(reservation));
+            ReservationResponseDto dto = reservationMapperDto.toResponseDto(reservation);
+            dto.setSalleNom(reservation.getSalle().getNom());   
+            reservationList.add(dto);
             
         }
 
@@ -150,13 +158,14 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
         ReservationResponseDto response=reservationMapperDto.toResponseDto(reservation);
+        response.setSalleNom(reservation.getSalle().getNom());
         if(response.getStatut() == Statut_reservation.CONFIRMEE)
         {
             try
             {
                 mailService.SendMailConfirmation(reservation.getUtilisateur().getMail(),response);
             }
-            catch(MailException e)
+            catch(Exception e)
             {
                 logger.error("Erreur lors de l'envoi du mail", e);
                 response.setWarning("Réservation validée mais echec de l'envoie du mail");
@@ -169,7 +178,7 @@ public class ReservationService {
             {
                 mailService.SendMailRefuse(reservation.getUtilisateur().getMail(),response,motif);
             }
-            catch(MailException e)
+            catch(Exception e)
             {
                 logger.error("Erreur lors de l'envoi du mail", e);
                 response.setWarning("Réservation refusée mais echec de l'envoie du mail");

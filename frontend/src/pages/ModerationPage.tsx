@@ -25,7 +25,8 @@ export default function ModerationPage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [processingId, setProcessingId] = useState<number | null>(null);
-  const [refusalTarget, setRefusalTarget] = useState<ReservationResponse | null>(null);
+  const [refusalTarget, setRefusalTarget] =
+    useState<ReservationResponse | null>(null);
   const [motif, setMotif] = useState("");
 
   function load() {
@@ -38,7 +39,6 @@ export default function ModerationPage() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- pattern légitime : chargement initial de la liste
     load();
   }, []);
 
@@ -93,12 +93,16 @@ export default function ModerationPage() {
       </header>
 
       {success && <div className={styles.successBox}>{success}</div>}
-      {error && !refusalTarget && <div className={styles.errorBox}>{error}</div>}
+      {error && !refusalTarget && (
+        <div className={styles.errorBox}>{error}</div>
+      )}
 
       {loading ? (
         <p className={styles.loading}>Chargement…</p>
       ) : reservations.length === 0 ? (
-        <p className={styles.empty}>Aucune demande en attente pour l'instant.</p>
+        <p className={styles.empty}>
+          Aucune demande en attente pour l'instant.
+        </p>
       ) : (
         <div className={styles.list}>
           {reservations.map((r) => (
@@ -164,7 +168,9 @@ export default function ModerationPage() {
                 onClick={confirmRefusal}
                 disabled={processingId === refusalTarget.id}
               >
-                {processingId === refusalTarget.id ? "Envoi…" : "Confirmer le refus"}
+                {processingId === refusalTarget.id
+                  ? "Envoi…"
+                  : "Confirmer le refus"}
               </button>
             </div>
           </div>

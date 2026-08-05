@@ -1,5 +1,3 @@
-// Types alignés sur les DTOs réels du backend (com.unireserve.dto.Reservation)
-
 export type TypeReservation = "RESERVATION" | "BLOCAGE";
 export type StatutReservation = "EN_ATTENTE" | "CONFIRMEE" | "REFUSEE";
 
